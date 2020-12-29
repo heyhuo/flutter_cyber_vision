@@ -1,8 +1,6 @@
 package com.heyhuo.flutter_cyber_vision
 
 import android.app.Activity
-import android.content.pm.PackageManager
-import android.widget.Toast
 import androidx.annotation.NonNull
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
@@ -11,10 +9,11 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
-import io.flutter.plugin.common.PluginRegistry
+
+
 
 /** FlutterCyberVisionPlugin */
-class FaceMeshPlugin :
+class FlutterCyberVisionPlugin :
         FlutterPlugin, MethodCallHandler, ActivityAware {
     /// The MethodChannel that will the communication between Flutter and native Android
     ///
@@ -23,8 +22,11 @@ class FaceMeshPlugin :
     private lateinit var channel: MethodChannel
 
     //    lateinit var activity: Activity
+    private lateinit var activityPluginBinding: ActivityPluginBinding
     private lateinit var activity: Activity
     private lateinit var pluginBinding: FlutterPlugin.FlutterPluginBinding
+    private lateinit var methodCallTag: String
+
 
     override fun onAttachedToEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(binding.binaryMessenger, "flutter_cyber_vision")
@@ -39,9 +41,24 @@ class FaceMeshPlugin :
     }
 
     override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
-        if (call.method == "getPlatformVersion") {
-            result.success("Android ${android.os.Build.VERSION.RELEASE}")
-        } else {
+        methodCallTag = call.method;
+
+        if (methodCallTag == "getFaceMeshView") {
+            val registerViewFactory = pluginBinding.platformViewRegistry.registerViewFactory(
+                    "faceMeshView",
+                    FaceMeshViewFactory(pluginBinding.binaryMessenger,
+                            call, activityPluginBinding))
+            result.success(registerViewFactory)
+        } else if (methodCallTag == "getAnimeView") {
+            val imgPath: String? = call.argument("imgPath")
+            val registerViewFactory = pluginBinding.platformViewRegistry.registerViewFactory(
+                    "animeView",
+                    FaceMeshViewFactory(pluginBinding.binaryMessenger,
+                            call, activityPluginBinding))
+            result.success(registerViewFactory)
+        } else if(methodCallTag=="getAnime"){
+            AnimeProducer(activity, call)
+        }else {
             result.notImplemented()
         }
     }
@@ -52,10 +69,10 @@ class FaceMeshPlugin :
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
         activity = binding.activity
-        pluginBinding.platformViewRegistry.registerViewFactory(
-                "faceMeshView", FaceMeshViewFactory(pluginBinding.binaryMessenger, binding)
-        )
-//        Toast.makeText(binding.activity, "Dsa", Toast.LENGTH_LONG).show()
+        activityPluginBinding = binding
+//        Toast.makeText(activity,"das",Toast.LENGTH_LONG).show()
+
+
     }
 
     override fun onDetachedFromActivityForConfigChanges() {

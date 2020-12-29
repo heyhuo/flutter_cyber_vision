@@ -21,7 +21,7 @@ import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.*
 import io.flutter.plugin.platform.PlatformView
 
-class FaceMeshView(context: Context?, viewId: Int?, binaryMessenger: BinaryMessenger,
+class FaceMeshView(context: Context?, private val viewId: Int?, binaryMessenger: BinaryMessenger,
                    private var activityBinding: ActivityPluginBinding)
     : PlatformView, MethodChannel.MethodCallHandler {
 
@@ -149,7 +149,6 @@ class FaceMeshView(context: Context?, viewId: Int?, binaryMessenger: BinaryMesse
 
     override fun getView(): SurfaceView? {
 //        textView.setText(txt)
-//        Toast.makeText(activity, "测试集花四海是哦", Toast.LENGTH_LONG).show()
         return previewDisplayView
     }
 

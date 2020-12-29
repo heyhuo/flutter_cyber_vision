@@ -12,9 +12,14 @@ dependencies:
   flutter:
     sdk: flutter
 
+  image_picker:
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+#  flutter_cyber_vision:
+#    path: flutter_cyber_vision
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -29,6 +34,7 @@ flutter:
     platforms:
       android:
         package: com.heyhuo.flutter_cyber_vision
+        # 这里插件名字要跟kt的类名一致，不然没法注册插件！！
         pluginClass: FlutterCyberVisionPlugin
       ios:
         pluginClass: FlutterCyberVisionPlugin
