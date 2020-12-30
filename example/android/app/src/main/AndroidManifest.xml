@@ -2,6 +2,7 @@
     package="com.heyhuo.flutter_cyber_vision_example">
    <application
         android:label="flutter_cyber_vision_example"
+        android:largeHeap="true"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"

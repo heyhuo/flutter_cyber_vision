@@ -1,12 +1,15 @@
 package com.heyhuo.flutter_cyber_vision
 
 import android.app.Activity
+import android.content.Context
+import android.content.res.AssetManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.os.Build
 import android.widget.Toast
 import java.io.FileInputStream
+import java.io.InputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.MappedByteBuffer
@@ -41,11 +44,11 @@ class Utils {
         for (x in 0 until 256) {
             for (y in 0 until 256) {
                 val color = Color.argb(
-                                ((imageArray[0][3][x][y] + 1) * 0.5f * 255f).roundToInt(),
-                                (linearToSrgb((imageArray[0][0][x][y] + 1) * 0.5f) * 255f).roundToInt(),
-                                (linearToSrgb((imageArray[0][1][x][y] + 1) * 0.5f) * 255f).roundToInt(),
-                                (linearToSrgb((imageArray[0][2][x][y] + 1) * 0.5f) * 255f).roundToInt()
-                        )
+                        ((imageArray[0][3][x][y] + 1) * 0.5f * 255f).roundToInt(),
+                        (linearToSrgb((imageArray[0][0][x][y] + 1) * 0.5f) * 255f).roundToInt(),
+                        (linearToSrgb((imageArray[0][1][x][y] + 1) * 0.5f) * 255f).roundToInt(),
+                        (linearToSrgb((imageArray[0][2][x][y] + 1) * 0.5f) * 255f).roundToInt()
+                )
                 // this y, x is in the correct order!!!
                 styledImage.setPixel(y, x, color)
             }
@@ -156,6 +159,12 @@ class Utils {
     fun getLocationBitmap(url: String): Bitmap {
         val fis = FileInputStream(url)
         return BitmapFactory.decodeStream(fis)
+    }
+
+    fun getAssetsBitmap(url: String, context: Context): Bitmap {
+        val fis = context.assets.open(url)
+        return BitmapFactory.decodeStream(fis)
+//        val fis:InputStream = Resources.getAssets().
     }
 
 

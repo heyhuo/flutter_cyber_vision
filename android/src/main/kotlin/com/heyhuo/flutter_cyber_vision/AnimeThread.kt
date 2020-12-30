@@ -21,7 +21,7 @@ class AnimeThread(
         private val activity: Activity,
         private val call: MethodCall,
         private var drawingHolder: SurfaceHolder,
-        bitmap: Bitmap) : HandlerThread("DrawingThread"), Handler.Callback {
+        private val bitmap: Bitmap) : HandlerThread("DrawingThread"), Handler.Callback {
 
     //画笔
     private var paint: Paint
@@ -56,22 +56,17 @@ class AnimeThread(
                 if (!isRunning) {
                     return true //线程没有运行，直接返回
                 }
-
-//                for (i in 0 until 5) {
                 //获取加锁的画布（避免线程问题）
                 val lockCanvas: Canvas = drawingHolder.lockCanvas()
                 lockCanvas.drawColor(Color.WHITE) //清空画布。这里设置画布为黑色
-                val rnd = Random.nextInt(10) / 10f
+                /* val rnd = Random.nextInt(10) / 10f
                 val param = floatArrayOf(rnd, 0.5f, 0.5f)
-
-                val bitmap: Bitmap = animeProducer.runModel(param)
+                val bitmap: Bitmap = animeProducer.runModel(param)*/
 
                 lockCanvas.drawBitmap(bitmap, matrix, paint) //执行绘制操作
                 drawingHolder.unlockCanvasAndPost(lockCanvas) //解锁画布
                 if (!bitmap.isRecycled)
                     bitmap.recycle()
-//                }
-//                lockCanvas.drawBitmap(iconBitmap, matrix, paint)
             }
         }
         return false

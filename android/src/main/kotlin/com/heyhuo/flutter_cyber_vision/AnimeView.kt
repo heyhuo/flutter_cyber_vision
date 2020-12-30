@@ -2,7 +2,8 @@ package com.heyhuo.flutter_cyber_vision
 
 import AnimeThread
 import android.content.Context
-import android.graphics.Bitmap
+import android.graphics.*
+import android.util.DisplayMetrics
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.view.View
@@ -14,6 +15,11 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.platform.PlatformView
 import org.tensorflow.lite.Interpreter
 import java.nio.MappedByteBuffer
+import java.util.*
+import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.TimeUnit
+import kotlin.random.Random
 
 
 class AnimeView(private var context: Context, private val viewId: Int, binaryMessenger: BinaryMessenger,
@@ -28,74 +34,62 @@ class AnimeView(private var context: Context, private val viewId: Int, binaryMes
     private lateinit var inputBufssfer: MappedByteBuffer
     private lateinit var outputBuffer: MappedByteBuffer
     private val utils = Utils()
-    private lateinit var animeThread:AnimeThread
-    val url = "/data/user/0/com.heyhuo.flutter_cyber_vision_example/cache/image_picker6400962099791283903.png"
+    private lateinit var animeThread: AnimeThread
+    private var displayMetrics: DisplayMetrics = context.getResources().getDisplayMetrics()
+    private var width = displayMetrics.widthPixels
+    private var height = displayMetrics.heightPixels
+    private val imageH = 256f
+    private val imageW = 256f
+    private val matrix = Matrix()
+    val url = call.argument<String>("imgPath") //"/data/user/0/com.heyhuo.flutter_cyber_vision_example/cache/image_picker6400962099791283903.png"
 //    private var mSurfaceHolder:SurfaceHolder=Hold;    // 画布
 
 
     private var animeDisplayView: SurfaceView = SurfaceView(context)
 
 
-//    init {
-//        setupAnimePreview()
-//    }
+    init {
+        matrix.setScale(width / imageW, height / imageH)
+        morphImg = utils.getLocationBitmap(url!!)
+        setupAnimePreview()
+    }
 
     /*初始化SurfaceView*/
     private fun setupAnimePreview() {
-//        animeDisplayView.visibility = View.GONE
-        /*animeDisplayView.holder.addCallback(
-                object : SurfaceHolder.Callback {
-                    override fun surfaceCreated(holder: SurfaceHolder?) {
-                        val paint = Paint() //画笔
-                        paint.isAntiAlias = true;//设置是否抗锯齿
-                        paint.style = Paint.Style.STROKE;//设置画笔风格
-                        val bitmap: Bitmap = utils.getLocationBitmap(url)
-                        val canvas: Canvas = holder!!.lockCanvas() // 先锁定当前surfaceView的画布
-
-                        canvas.drawBitmap(bitmap,0f,0f,paint) //执行绘制操作
-
-                        holder.unlockCanvasAndPost(canvas) // 解除锁定并显示在界面上
-
-
-                    }
-
-                    override fun surfaceChanged(holder: SurfaceHolder?, format: Int, width: Int, height: Int) {
-                        TODO("Not yet implemented")
-                    }
-
-                    override fun surfaceDestroyed(holder: SurfaceHolder?) {
-                        TODO("Not yet implemented")
-                    }
-
-                }
-        )*/
 
         animeDisplayView.holder.addCallback(object : SurfaceHolder.Callback {
             override fun surfaceCreated(holder: SurfaceHolder) {
-                val bitmap = utils.getLocationBitmap(url)
-                animeThread = AnimeThread(
-                        context, activity, call, holder, bitmap
-                )
-                animeThread.start()
-//                handler = WeakHandler(animeThread.getLooper(), this)
-                /*   val paint = Paint() //画笔
-                paint.isAntiAlias = true //设置是否抗锯齿
-                paint.style = Paint.Style.FILL //设置画笔风格
-                // 先锁定当前surfaceView的画布
-                val canvas = holder.lockCanvas()
-                canvas.drawColor(Color.WHITE)
-                canvas.drawBitmap(utils.getLocationBitmap(url),)
 
-
-               for (i in 0 until 5) {
-                    val param = floatArrayOf(0.3f+(i.toFloat()/5f), 0.5f, 0.5f)
-                    val bitmap: Bitmap =
-                            AnimeProducer(activity, call).runModel(param)
-                    canvas.drawBitmap(bitmap, 0f, 0f, paint) //执行绘制操作
+                val animeThreadPool: ThreadPoolExecutor =
+                        ThreadPoolExecutor(1, 128, 10, TimeUnit.SECONDS,
+                                LinkedBlockingQueue<Runnable>(256))
+                val animeProducer = AnimeProducer(activity, call)
+                val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+                for (i in 0 until 64) {
+                    val runnable = Runnable {
+                        try {
+                            val rnd = Random.nextInt(10) / 10f
+                            val param = floatArrayOf(rnd, rnd, rnd)
+                            val bitmap: Bitmap = animeProducer.runModel(param)
+                            val lockCanvas: Canvas = holder.lockCanvas()
+                            lockCanvas.drawColor(Color.WHITE) //清空画布。这里设置画布为黑色
+                            lockCanvas.drawBitmap(bitmap, matrix, paint) //执行绘制操作
+                            holder.unlockCanvasAndPost(lockCanvas) //解锁画布
+//                            if (!bitmap.isRecycled)
+                            bitmap.recycle()
+//                            Thread.sleep(3000)
+//                            Log.e("TAG", "run : " + finali.toString() + "  当前线程：" + Thread.currentThread().name)
+                        } catch (e: InterruptedException) {
+                            e.printStackTrace()
+                        }
+                    }
+                    animeThreadPool.execute(runnable)
+//                    animeThread = AnimeThread(context, activity, call, holder, morphImg)
                 }
 
-                // 解除锁定并显示在界面上
-                holder.unlockCanvasAndPost(canvas)*/
+
+//                animeThread.start()
+
             }
 
             override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
@@ -111,8 +105,6 @@ class AnimeView(private var context: Context, private val viewId: Int, binaryMes
     }
 
     override fun getView(): View {
-
-        setupAnimePreview()
 
 
         return animeDisplayView

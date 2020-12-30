@@ -101,10 +101,7 @@ class _MyAppState extends State<MyApp> {
  Future getAnime() async{
     var flag = "test";
     Widget aaView;
-    var path;
-    if (flag=="test")
-      path = "sda";
-    else path = image.path;
+    var path = image.path;
 
     Map<String, Object> map = {"imgPath": path};
     await _channel.invokeMethod("getAnimeView", map);

@@ -27,7 +27,7 @@ class AnimeProducer(private val activity: Activity,
     private lateinit var sourceImgBuffer: ByteBuffer
     private lateinit var morphParamBuffer: ByteBuffer
     private lateinit var outputBuffer: MappedByteBuffer
-    private var imgPath: String = "/data/user/0/com.heyhuo.flutter_cyber_vision_example/cache/image_picker6400962099791283903.png" //args.argument("imgPath")
+    private var imgPath: String? = call.argument<String>("imgPath") //"/data/user/0/com.heyhuo.flutter_cyber_vision_example/cache/image_picker6400962099791283903.png" //args.argument("imgPath")
     private val ddims = intArrayOf(1, 4, 256, 256)
 
     init {
@@ -85,7 +85,7 @@ class AnimeProducer(private val activity: Activity,
         options.setNumThreads(THREAD_NUM)
         interpreter = Interpreter(model, options)
 
-        imgBitmap = utils.getLocationBitmap(imgPath)
+        imgBitmap = utils.getLocationBitmap(imgPath!!)
         sourceImgBuffer = utils.bitmapToBuffer(imgBitmap)
 
         /*查看输入的bitmap*/
