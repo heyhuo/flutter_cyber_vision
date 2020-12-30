@@ -65,14 +65,18 @@ class AnimeView(private var context: Context, private val viewId: Int, binaryMes
                                 LinkedBlockingQueue<Runnable>(256))
                 val animeProducer = AnimeProducer(activity, call)
                 val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+
                 for (i in 0 until 64) {
                     val runnable = Runnable {
                         try {
                             val rnd = Random.nextInt(10) / 10f
                             val param = floatArrayOf(rnd, rnd, rnd)
-                            val bitmap: Bitmap = animeProducer.runModel(param)
+                            val interpreter = animeProducer.getInterpreter()
+                            val bitmap: Bitmap = animeProducer.runModel(interpreter,param)
                             val lockCanvas: Canvas = holder.lockCanvas()
-                            lockCanvas.drawColor(Color.WHITE) //清空画布。这里设置画布为黑色
+                            if(i%2==1)
+                                lockCanvas.drawColor(Color.BLUE)
+                            else lockCanvas.drawColor(Color.GRAY)
                             lockCanvas.drawBitmap(bitmap, matrix, paint) //执行绘制操作
                             holder.unlockCanvasAndPost(lockCanvas) //解锁画布
 //                            if (!bitmap.isRecycled)
